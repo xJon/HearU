@@ -1,0 +1,13 @@
+/*
+/*/
+/app/src/test
+/app/src/androidTest
+/app/.gitignore
+/app/proguard-rules.pro
+/app/app.iml
+/app/build.gradle
+!/app/
+!.gitignore
+!/README.md
+!/LICENSE
+!/TODO.txt
