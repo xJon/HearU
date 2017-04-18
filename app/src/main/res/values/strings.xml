@@ -6,6 +6,7 @@
     <string name="title_section2">Schedule</string>
     <string name="title_section3">Help</string>
     <string name="actions">Actions</string>
+    <string name="contacts">Contacts whitelist</string>
     <string name="add">Add new</string>
     <string name="and">and</string>
     <string name="confirm_delete_short">Delete period</string>

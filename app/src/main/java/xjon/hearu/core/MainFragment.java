@@ -6,11 +6,16 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,10 +54,13 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 	private ArrayList<Alarm> alarm_data;
 	private ArrayList<Integer> alarmIDs;
+    private ArrayList<Contact> contact_data;
 
 	private Typeface typefaceRobotoLight;
 
-	@Override
+    private static final int PICK_CONTACT_REQUEST = 5;
+
+    @Override
 	public void onAttach(final Activity activity) {
 		super.onAttach(activity);
 	}
@@ -72,6 +80,9 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		typefaceRobotoLight = Tools.getTypefaceRobotoLight(activity);
 		dbAdapter = new AlarmDbAdapter(activity);
 		dbAdapter.open();
+
+        contact_data = new ArrayList<>();
+        Log.i("data", "contacts list size is " + contact_data.size());
 
 		serviceCheck = (CheckBox) v.findViewById(R.id.service_check);
 		serviceCheck.setTypeface(typefaceRobotoLight);
@@ -290,10 +301,13 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		final Button toButton = (Button) view.findViewById(R.id.to_button);
 		toButton.setTypeface(typefaceRobotoLight);
 
+		final Button addContact = (Button) view.findViewById(R.id.add_contact_button);
+		final Button clearContacts = (Button) view.findViewById(R.id.clear_contacts_button);
+
 		fromButton.setText(Tools.fixTimeFormatting(fromHours, fromMinutes));
 		toButton.setText(Tools.fixTimeFormatting(toHours, toMinutes));
 
-		OnClickListener listener = new OnClickListener() {
+		OnClickListener listenerTime = new OnClickListener() {
 
 			public void onClick(final View parent) {
 				final AlertDialog.Builder nDialog = new AlertDialog.Builder(getActivity());
@@ -328,8 +342,27 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 			}
 		};
 
-		fromButton.setOnClickListener(listener);
-		toButton.setOnClickListener(listener);
+		fromButton.setOnClickListener(listenerTime);
+		toButton.setOnClickListener(listenerTime);
+
+		OnClickListener listenerContacts = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+                switch (v.getId())
+                {
+                    case R.id.add_contact_button:
+                            pickContact();
+                        break;
+
+                    case R.id.clear_contacts_button:
+
+                        break;
+                }
+			}
+		};
+
+		addContact.setOnClickListener(listenerContacts);
+		clearContacts.setOnClickListener(listenerContacts);
 
 		final CheckBox vibrationCheck = (CheckBox) view.findViewById(R.id.enable_vibr_check);
 		vibrationCheck.setChecked(enableVibration);
@@ -562,4 +595,47 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 		}
 	}
+
+
+    public void pickContact()
+    {
+        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); //Show only contacts with phone numbers
+        startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == PICK_CONTACT_REQUEST)
+        {
+            if (resultCode == Activity.RESULT_OK)
+            {
+                final Uri uri = data.getData();
+                final String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY };
+
+                Thread thread = new Thread() {
+                    @Override
+                    public void run()
+                    {
+                        Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
+                        cursor.moveToFirst();
+
+                        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                        String number = cursor.getString(numberColumnIndex);
+
+                        int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY);
+                        String name = cursor.getString(nameColumnIndex);
+
+                        dbAdapter.open();
+                        Contact c = new Contact(name, number);
+                        c = dbAdapter.createContact(c);
+                        contact_data.add(c);
+                    }
+                };
+
+                thread.start();
+            }
+        }
+    }
 }
