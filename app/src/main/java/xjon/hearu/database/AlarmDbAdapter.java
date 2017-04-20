@@ -194,7 +194,7 @@ public class AlarmDbAdapter {
         values.put(KEY_CONTACT_NUMBER, contact.getNumber());
 
         long insertId = mDb.insert(DATABASE_TABLE_CONTACTS, null, values);
-        Log.i("data", "Contact " + insertId + " was inserted into database");
+        Log.i("hearu-data", "Contact " + contact.getName() + ", " + contact.getNumber() + ", was inserted into database");
         contact.setContactId(insertId);
 
         return contact;
@@ -205,6 +205,11 @@ public class AlarmDbAdapter {
 	public boolean deleteAlarm(final int alarmId) {
 		return mDb.delete(DATABASE_TABLE_ALARMS, KEY_ALARMID + "=" + alarmId, null) > 0;
 	}
+
+	public boolean deleteContact(final long contactId)
+    {
+        return mDb.delete(DATABASE_TABLE_CONTACTS, KEY_CONTACTID + "=" + contactId, null) > 0;
+    }
 
 	// FETCH
 	public Cursor fetchAlarm(final int alarmId) {
@@ -242,6 +247,27 @@ public class AlarmDbAdapter {
 
 		return alarm_data;
 	}
+
+	public ArrayList<Contact> getAllContacts()
+    {
+        ArrayList<Contact> contact_data = new ArrayList<>();
+
+        Cursor cursor = mDb.query(AlarmDbAdapter.DATABASE_TABLE_CONTACTS, contactsTableColums, null, null, null, null, null);
+        if (cursor.getCount() > 0)
+        {
+            while (cursor.moveToNext())
+            {
+                long contactId = cursor.getLong(cursor.getColumnIndex(AlarmDbAdapter.KEY_ALARMID));
+                int contactAlarmId = cursor.getInt(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACTALARMID));
+                String name = cursor.getString(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACT_NAME));
+                String number = cursor.getString(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACT_NUMBER));
+                Contact c = new Contact(name, number, contactAlarmId);
+                c.setContactId(contactId);
+                contact_data.add(c);
+            }
+        }
+        return contact_data;
+    }
 
 	public ArrayList<Integer> fetchAllAlarmIDs() {
 

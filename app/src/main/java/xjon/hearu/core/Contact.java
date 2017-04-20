@@ -2,14 +2,17 @@ package xjon.hearu.core;
 
 public class Contact {
 
-    private long contactId, contactAlarmId;
-    private String name;
-    private String number;
+    private long contactId;
+    private int contactAlarmId;
+    private String name, number;
 
-    public Contact(String name, String number) {
+    public Contact(String name, String number, int contactAlarmId) {
         this.name = name;
         this.number = number;
+        this.contactAlarmId = contactAlarmId;
     }
+
+    public long getContactId() { return contactId; }
 
     public void setContactId(long contactId) {
         this.contactId = contactId;
@@ -35,7 +38,7 @@ public class Contact {
         return contactAlarmId;
     }
 
-    public void setContactAlarmId(long contactAlarmId) {
+    public void setContactAlarmId(int contactAlarmId) {
         this.contactAlarmId = contactAlarmId;
     }
 

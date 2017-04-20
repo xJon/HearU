@@ -58,6 +58,8 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 	private Typeface typefaceRobotoLight;
 
+    private TextView contactList;
+
     private static final int PICK_CONTACT_REQUEST = 5;
 
     @Override
@@ -82,7 +84,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		dbAdapter.open();
 
         contact_data = new ArrayList<>();
-        Log.i("data", "contacts list size is " + contact_data.size());
+        Log.i("hearu-data", "contacts list size is " + contact_data.size());
 
 		serviceCheck = (CheckBox) v.findViewById(R.id.service_check);
 		serviceCheck.setTypeface(typefaceRobotoLight);
@@ -255,7 +257,20 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 	private android.app.AlertDialog.Builder createAlarmDialog(final int from, final int to, final boolean enableVibration, final boolean muteMedia, final boolean lockVolume,
 			final boolean unmuteOnCall, final boolean disableNotificationLight, final int brightness, final boolean[] wdays, final boolean newAlarm, final int updateAlarmId) {
 
-		int fromHours = from / 60;
+        final int alarmId;
+
+        if (newAlarm)
+        {
+            alarmId = settings.getInt(Constants.SCHEDULER_MAX_ALARM_ID, 0) + 2;
+        }
+        else
+        {
+            alarmId = updateAlarmId;
+        }
+
+        alarmIDs.add(alarmId);
+
+        int fromHours = from / 60;
 		int fromMinutes = from % 60;
 
 		int toHours = to / 60;
@@ -263,7 +278,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 		final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
 
-		View view = getActivity().getLayoutInflater().inflate(R.layout.alarm_popup, null);
+		final View view = getActivity().getLayoutInflater().inflate(R.layout.alarm_popup, null);
 
 		dialog.setView(view);
 
@@ -344,25 +359,6 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 		fromButton.setOnClickListener(listenerTime);
 		toButton.setOnClickListener(listenerTime);
-
-		OnClickListener listenerContacts = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-                switch (v.getId())
-                {
-                    case R.id.add_contact_button:
-                            pickContact();
-                        break;
-
-                    case R.id.clear_contacts_button:
-
-                        break;
-                }
-			}
-		};
-
-		addContact.setOnClickListener(listenerContacts);
-		clearContacts.setOnClickListener(listenerContacts);
 
 		final CheckBox vibrationCheck = (CheckBox) view.findViewById(R.id.enable_vibr_check);
 		vibrationCheck.setChecked(enableVibration);
@@ -508,7 +504,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 				int brightness = settings.getInt(Constants.SCHEDULER_BRIGHTNESS, 125);
 
 				// Set the alarm.
-				setAlarm(fromHours, fromMinutes, toHours, toMinutes, vibChecked, mediaChecked, lockChecked, unmuteChecked, notiLightChecked, brightness, wdays, newAlarm, updateAlarmId);
+				setAlarm(fromHours, fromMinutes, toHours, toMinutes, vibChecked, mediaChecked, lockChecked, unmuteChecked, notiLightChecked, brightness, wdays, newAlarm, alarmId, updateAlarmId);
 
 				// Save the current state of this activity in shared
 				// preferences
@@ -521,6 +517,56 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 				dialog.dismiss();
 			}
 		});
+
+        OnClickListener listenerContacts = new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId())
+                {
+                    case R.id.add_contact_button:
+                        pickContact(alarmId);
+                        break;
+
+                    case R.id.clear_contacts_button:
+                        ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
+                        Contact[] contactsArray = new Contact[contactsArrayList.size()];
+                        contactsArray = contactsArrayList.toArray(contactsArray);
+                        for (Contact c : contactsArray)
+                        {
+                            if (c.getContactAlarmId() == alarmId)
+                            {
+                                if (dbAdapter.deleteContact(c.getContactId()))
+                                {
+                                    Log.i("hearu-data", "Contact " + c.getNumber() + " was deleted.");
+                                }
+                            }
+                        }
+                        contactList.setText("All contacts for selected alarm have been removed.");
+                        break;
+                }
+            }
+        };
+
+        addContact.setOnClickListener(listenerContacts);
+        clearContacts.setOnClickListener(listenerContacts);
+
+        contactList = (TextView) view.findViewById(R.id.contacts);
+
+        String contacts = "";
+        ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
+        Contact[] contactsArray = new Contact[contactsArrayList.size()];
+        contactsArray = contactsArrayList.toArray(contactsArray);
+        for (Contact c : contactsArray)
+        {
+            if (c.getContactAlarmId() == alarmId)
+            {
+                contacts += c.getName() + ", ";
+            }
+        }
+        if (contacts != "")
+        {
+            contactList.setText(contacts.substring(0, contacts.length() - 2) + ".");
+        }
 
 		return dialog;
 	}
@@ -541,9 +587,8 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 	 *            if the alarm is to be updated, this is its ID. This value can be set to anything if the alarm is new
 	 */
 	private void setAlarm(final int fromHours, final int fromMinutes, final int toHours, final int toMinutes, final boolean enableVibration, final boolean muteMedia, final boolean lockVolume,
-			final boolean unmuteOnCall, final boolean disableNotificationLight, final int brightness, final boolean[] wdays, final boolean newAlarm, final int updateAlarmId) {
+			final boolean unmuteOnCall, final boolean disableNotificationLight, final int brightness, final boolean[] wdays, final boolean newAlarm, final int alarmId, final int updateAlarmId) {
 
-		int alarmId;
 		Alarm alarm = new Alarm(fromHours * 60 + fromMinutes, toHours * 60 + toMinutes, enableVibration, muteMedia, lockVolume, unmuteOnCall, disableNotificationLight, brightness, wdays);
 		alarm_data.add(alarm);
 
@@ -551,20 +596,15 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 		alarmList.setAdapter(new AlarmAdapter(getActivity(), R.layout.alarm_list_item, alarm_data.toArray(alarmArray)));
 
-		if (newAlarm) {
-			alarmId = settings.getInt(Constants.SCHEDULER_MAX_ALARM_ID, 0) + 2;
-			dbAdapter.createAlarm(alarmId, alarm);
+        if (newAlarm) {
+            dbAdapter.createAlarm(alarmId, alarm);
 
-			editor.putInt(Constants.SCHEDULER_MAX_ALARM_ID, alarmId);
-			editor.commit();
+            editor.putInt(Constants.SCHEDULER_MAX_ALARM_ID, alarmId);
+            editor.commit();
 
-		} else {
-
-			alarmId = updateAlarmId;
-			dbAdapter.updateAlarm(alarmId, alarm);
-		}
-
-		alarmIDs.add(alarmId);
+        } else {
+            dbAdapter.updateAlarm(alarmId, alarm);
+        }
 
 		Tools.setAlarm(getActivity(), dbAdapter, alarm, alarmId);
 
@@ -597,15 +637,16 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 	}
 
 
-    public void pickContact()
+    public void pickContact(int alarmId)
     {
         Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
         pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); //Show only contacts with phone numbers
+        pickContactIntent.putExtra("alarmId", alarmId);
         startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(int requestCode, int resultCode, final Intent data)
     {
         if (requestCode == PICK_CONTACT_REQUEST)
         {
@@ -628,7 +669,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
                         String name = cursor.getString(nameColumnIndex);
 
                         dbAdapter.open();
-                        Contact c = new Contact(name, number);
+                        Contact c = new Contact(name, number, data.getExtras().getInt("alarmId"));
                         c = dbAdapter.createContact(c);
                         contact_data.add(c);
                     }
