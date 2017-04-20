@@ -60,6 +60,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
     private TextView contactList;
 
+    private int currentAlarmId;
     private static final int PICK_CONTACT_REQUEST = 5;
 
     @Override
@@ -228,6 +229,9 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 			Alarm alarm = alarm_data.get(position);
 
+            Log.i("hearu-data", "pos: " + position);
+            Log.i("hearu-data", "alarm_data: " + alarm_data.get(position).toString());
+
 			final AlertDialog.Builder dialog = createAlarmDialog(alarm.from, alarm.to, alarm.enableVibration, alarm.muteMedia, alarm.lockVolume, alarm.unmuteOnCall, alarm.disableNotiLight,
 					alarm.brightness, new boolean[] { alarm.sunday, alarm.monday, alarm.tuesday, alarm.wednesday, alarm.thursday, alarm.friday, alarm.saturday }, false, alarmIDs.get(position));
 
@@ -268,7 +272,9 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
             alarmId = updateAlarmId;
         }
 
+        Log.i("hearu-data", "alarmId: " + alarmId);
         alarmIDs.add(alarmId);
+        Log.i("hearu-data", alarmIDs.toString());
 
         int fromHours = from / 60;
 		int fromMinutes = from % 60;
@@ -524,7 +530,8 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
                 switch (v.getId())
                 {
                     case R.id.add_contact_button:
-                        pickContact(alarmId);
+                        currentAlarmId = alarmId;
+                        pickContact();
                         break;
 
                     case R.id.clear_contacts_button:
@@ -637,11 +644,10 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 	}
 
 
-    public void pickContact(int alarmId)
+    public void pickContact()
     {
         Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
         pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); //Show only contacts with phone numbers
-        pickContactIntent.putExtra("alarmId", alarmId);
         startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
     }
 
@@ -669,7 +675,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
                         String name = cursor.getString(nameColumnIndex);
 
                         dbAdapter.open();
-                        Contact c = new Contact(name, number, data.getExtras().getInt("alarmId"));
+                        Contact c = new Contact(name, number, currentAlarmId);
                         c = dbAdapter.createContact(c);
                         contact_data.add(c);
                     }
