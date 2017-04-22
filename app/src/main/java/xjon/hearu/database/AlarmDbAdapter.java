@@ -257,7 +257,7 @@ public class AlarmDbAdapter {
         {
             while (cursor.moveToNext())
             {
-                long contactId = cursor.getLong(cursor.getColumnIndex(AlarmDbAdapter.KEY_ALARMID));
+                long contactId = cursor.getLong(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACTID));
                 int contactAlarmId = cursor.getInt(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACTALARMID));
                 String name = cursor.getString(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACT_NAME));
                 String number = cursor.getString(cursor.getColumnIndex(AlarmDbAdapter.KEY_CONTACT_NUMBER));

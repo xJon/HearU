@@ -229,6 +229,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 			Alarm alarm = alarm_data.get(position);
 
+            Log.i("hearu-data", "alarmIDs size: " + alarmIDs.size());
             Log.i("hearu-data", "pos: " + position);
             Log.i("hearu-data", "alarm_data: " + alarm_data.get(position).toString());
 
@@ -273,7 +274,6 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
         }
 
         Log.i("hearu-data", "alarmId: " + alarmId);
-        alarmIDs.add(alarmId);
         Log.i("hearu-data", alarmIDs.toString());
 
         int fromHours = from / 60;
@@ -612,6 +612,8 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
         } else {
             dbAdapter.updateAlarm(alarmId, alarm);
         }
+
+        alarmIDs.add(alarmId);
 
 		Tools.setAlarm(getActivity(), dbAdapter, alarm, alarmId);
 
