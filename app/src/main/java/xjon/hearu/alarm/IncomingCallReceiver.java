@@ -6,12 +6,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.media.AudioManager;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.util.ArrayList;
+
+import xjon.hearu.core.Contact;
+import xjon.hearu.database.AlarmDbAdapter;
 import xjon.hearu.utility.Constants;
 
 public class IncomingCallReceiver extends BroadcastReceiver {
+
+	private AlarmDbAdapter dbAdapter;
 
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
@@ -21,6 +28,7 @@ public class IncomingCallReceiver extends BroadcastReceiver {
 		// Needed to see in what way the phone state changed (New call, hang up
 		// etc)
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		Log.i("hearu-data", "incoming number: " + intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER));
 
 		// Needed to change the volume
 		AudioManager audioMgr = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -36,8 +44,21 @@ public class IncomingCallReceiver extends BroadcastReceiver {
 			// If the sound is not muted, do nothing
 			if (isMuted || unmutedByReceiver) {
 
+				dbAdapter = new AlarmDbAdapter(context);
+				boolean isWhitelistContactCalling = false;
+				dbAdapter.open();
+				ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
+				Contact[] contactsArray = new Contact[contactsArrayList.size()];
+				contactsArray = contactsArrayList.toArray(contactsArray);
+				for (Contact c : contactsArray) {
+					if (c.getNumber() == intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)) {
+						isWhitelistContactCalling = true;
+						break;
+					}
+				}
+
 				// If we are not supposed to unmute on call, do nothing
-				if (unmuteOnCall) {
+				if (unmuteOnCall || isWhitelistContactCalling) {
 
 					Editor editor = settings.edit();
 

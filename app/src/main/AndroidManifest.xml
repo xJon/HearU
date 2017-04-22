@@ -38,7 +38,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".alarm.IncomingCallReceiver">
+        <receiver android:name="xjon.hearu.alarm.IncomingCallReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE"/>
             </intent-filter>

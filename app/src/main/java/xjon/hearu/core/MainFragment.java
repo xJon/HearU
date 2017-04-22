@@ -229,10 +229,6 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
 			Alarm alarm = alarm_data.get(position);
 
-            Log.i("hearu-data", "alarmIDs size: " + alarmIDs.size());
-            Log.i("hearu-data", "pos: " + position);
-            Log.i("hearu-data", "alarm_data: " + alarm_data.get(position).toString());
-
 			final AlertDialog.Builder dialog = createAlarmDialog(alarm.from, alarm.to, alarm.enableVibration, alarm.muteMedia, alarm.lockVolume, alarm.unmuteOnCall, alarm.disableNotiLight,
 					alarm.brightness, new boolean[] { alarm.sunday, alarm.monday, alarm.tuesday, alarm.wednesday, alarm.thursday, alarm.friday, alarm.saturday }, false, alarmIDs.get(position));
 
@@ -272,9 +268,6 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
         {
             alarmId = updateAlarmId;
         }
-
-        Log.i("hearu-data", "alarmId: " + alarmId);
-        Log.i("hearu-data", alarmIDs.toString());
 
         int fromHours = from / 60;
 		int fromMinutes = from % 60;
@@ -559,7 +552,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
         contactList = (TextView) view.findViewById(R.id.contacts);
 
-        String contacts = "";
+        String contacts = "\u200E";
         ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
         Contact[] contactsArray = new Contact[contactsArrayList.size()];
         contactsArray = contactsArrayList.toArray(contactsArray);
@@ -567,12 +560,12 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
         {
             if (c.getContactAlarmId() == alarmId)
             {
-                contacts += c.getName() + ", ";
+                contacts += c.getName() + "\u200E, ";
             }
         }
-        if (contacts != "")
+        if (contacts != "\u200E")
         {
-            contactList.setText(contacts.substring(0, contacts.length() - 2) + ".");
+            contactList.setText(contacts.substring(0, contacts.length() - 2) + "\u200E.");
         }
 
 		return dialog;
@@ -670,14 +663,22 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
                         Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
                         cursor.moveToFirst();
 
-                        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                        String number = cursor.getString(numberColumnIndex);
-
                         int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY);
                         String name = cursor.getString(nameColumnIndex);
 
-                        dbAdapter.open();
-                        Contact c = new Contact(name, number, currentAlarmId);
+                        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                        String number = cursor.getString(numberColumnIndex).replaceAll("[^0-9]", "");
+                        Contact c;
+                        if (number.length() != 10)
+                        {
+                            number = number.substring(3);
+                            String newNumber = "0" + number;
+                            c = new Contact(name, newNumber, currentAlarmId);
+                        }
+                        else
+                        {
+                            c = new Contact(name, number, currentAlarmId);
+                        }
                         c = dbAdapter.createContact(c);
                         contact_data.add(c);
                     }

@@ -194,7 +194,7 @@ public class AlarmDbAdapter {
         values.put(KEY_CONTACT_NUMBER, contact.getNumber());
 
         long insertId = mDb.insert(DATABASE_TABLE_CONTACTS, null, values);
-        Log.i("hearu-data", "Contact " + contact.getName() + ", " + contact.getNumber() + ", was inserted into database");
+        Log.i("hearu-data", "Contact " + contact.getName() + ", " + contact.getNumber() + ", was inserted into database.");
         contact.setContactId(insertId);
 
         return contact;
