@@ -12,10 +12,20 @@ public class Contact {
         this.contactAlarmId = contactAlarmId;
     }
 
-    public long getContactId() { return contactId; }
+    public long getContactId() {
+        return contactId;
+    }
 
     public void setContactId(long contactId) {
         this.contactId = contactId;
+    }
+
+    public int getContactAlarmId() {
+        return contactAlarmId;
+    }
+
+    public void setContactAlarmId(int contactAlarmId) {
+        this.contactAlarmId = contactAlarmId;
     }
 
     public String getName() {
@@ -32,14 +42,6 @@ public class Contact {
 
     public void setNumber(String number) {
         this.number = number;
-    }
-
-    public long getContactAlarmId() {
-        return contactAlarmId;
-    }
-
-    public void setContactAlarmId(int contactAlarmId) {
-        this.contactAlarmId = contactAlarmId;
     }
 
     @Override

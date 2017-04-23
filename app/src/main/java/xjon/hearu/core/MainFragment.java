@@ -85,7 +85,6 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		dbAdapter.open();
 
         contact_data = new ArrayList<>();
-        Log.i("hearu-data", "contacts list size is " + contact_data.size());
 
 		serviceCheck = (CheckBox) v.findViewById(R.id.service_check);
 		serviceCheck.setTypeface(typefaceRobotoLight);
@@ -147,6 +146,20 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 					public void onClick(final DialogInterface dialog, final int which) {
 						int tempId = alarmIDs.get(pos);
 
+						//Delete all contacts of the alarm
+						ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
+						Contact[] contactsArray = new Contact[contactsArrayList.size()];
+						contactsArray = contactsArrayList.toArray(contactsArray);
+						for (Contact c : contactsArray)
+						{
+							if (c.getContactAlarmId() == tempId)
+							{
+								if (dbAdapter.deleteContact(c.getContactId()))
+								{
+									Log.i("hearu-data", "Contact " + c.getNumber() + " was deleted.");
+								}
+							}
+						}
 						dbAdapter.deleteAlarm(tempId);
 
 						Tools.cancelOldAlarms(getActivity(), am, tempId);
@@ -655,7 +668,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
             {
                 final Uri uri = data.getData();
                 final String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY };
-
+				
                 Thread thread = new Thread() {
                     @Override
                     public void run()

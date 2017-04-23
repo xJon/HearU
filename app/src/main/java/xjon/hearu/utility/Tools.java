@@ -197,7 +197,7 @@ public class Tools {
 		schedulerIntent.putExtra(Constants.SCHEDULER_BRIGHTNESS, alarm.brightness);
 		schedulerIntent.putExtra(Constants.SCHEDULER_DISABLE_NOTI_LIGHT, alarm.disableNotiLight);
 
-		cancelOldAlarms(context, alarmManager, alarmId);
+        cancelOldAlarms(context, alarmManager, alarmId);
 
 		// Set the alarm
 		alarmManager.set(AlarmManager.RTC_WAKEUP, calFrom.getTimeInMillis(), Tools.getDistinctPendingIntent(context, schedulerIntent, disableId));
@@ -208,7 +208,7 @@ public class Tools {
 
 		// Set the alarm
 		alarmManager.set(AlarmManager.RTC_WAKEUP, calTo.getTimeInMillis(), Tools.getDistinctPendingIntent(context, schedulerIntent, enableId));
-	}
+    }
 
 	public static void cancelOldAlarms(Context context, AlarmManager am, final int tempId) {
 		// Needed to cancel the alarms properly

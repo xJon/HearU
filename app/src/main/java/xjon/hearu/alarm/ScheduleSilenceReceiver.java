@@ -21,6 +21,7 @@ public class ScheduleSilenceReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
 		SharedPreferences settings = context.getSharedPreferences(Constants.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+		Editor editor = settings.edit();
 		Bundle extras = intent.getExtras();
 
 		AlarmDbAdapter dbAdapter = new AlarmDbAdapter(context);
@@ -28,6 +29,8 @@ public class ScheduleSilenceReceiver extends BroadcastReceiver {
 
 		// Put all of the relevant extras into variables
 		int alarmId = extras.getInt(Constants.SCHEDULER_ALARM_ID, 0);
+		editor.putInt(Constants.SCHEDULER_ALARM_ID, alarmId);
+		editor.commit();
 		boolean enableSound = extras.getBoolean(Constants.SCHEDULER_SET_SOUND_ENABLED, false);
 		boolean enableVibration = extras.getBoolean(Constants.SCHEDULER_SET_VIBRATION_ENABLED, false);
 		boolean muteMedia = extras.getBoolean(Constants.SCHEDULER_SET_MEDIA_DISABLED, false);
