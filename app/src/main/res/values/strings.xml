@@ -28,7 +28,7 @@
     <string name="no">No</string>
     <string name="pick_time">Pick time</string>
     <string name="picker_hint">Press the buttons or fling the text to change time.</string>
-    <string name="scheduler_tooltip_text">Quick Mute: Perform a quick, one-time mute of the ring and notification sounds. Sound is unmuted again after the set duration. \n\nSchedule: When the service is running it will automatically mute all sounds (except alarms) every day between the set times.\n\nAdd and setup a new period by pressing  "Add new", delete a period by long pressing it.\n\nTip: To mute the phone from 22:00 on Thursday to 06:00 on Friday, set the period from 22:00 to 06:00 and the day to Thursday.</string>
+    <string name="scheduler_tooltip_text">Whitelisted Contacts: As you add a new alarm, click "ADD" in the Contacts whitelist section, and add the contacts you want to call even through your silenced phone.\n\nQuick Mute: Perform a quick, one-time mute of the ring and notification sounds. Sound is unmuted again after the set duration.\n\nSchedule: When the service is running it will automatically mute all sounds (except alarms) every day between the set times.\n\nAdd and setup a new period by pressing "Add new", delete a period by long pressing it.\n\nTip: To mute the phone from 22:00 on Thursday to 06:00 on Friday, set the period from 22:00 to 06:00 and the day to Thursday.</string>
     <string name="scheduler_popup_tooltip_text">Note that if audio is set to be reenabled before being disabled, it will be enabled on the next day.</string>
     <string name="service_started">Service enabled</string>
     <string name="service_stopped">Service disabled</string>

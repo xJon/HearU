@@ -654,7 +654,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
     public void pickContact()
     {
-        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+		Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
         pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); //Show only contacts with phone numbers
         startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
     }
@@ -700,5 +700,22 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
                 thread.start();
             }
         }
+
+		String contacts = "\u200E";
+		ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
+		Contact[] contactsArray = new Contact[contactsArrayList.size()];
+		contactsArray = contactsArrayList.toArray(contactsArray);
+		for (Contact c : contactsArray)
+		{
+			if (c.getContactAlarmId() == currentAlarmId)
+			{
+				contacts += c.getName() + "\u200E, ";
+			}
+		}
+		if (contacts != "\u200E")
+		{
+			contactList.setText(contacts.substring(0, contacts.length() - 2) + "\u200E.");
+		}
+
     }
 }
