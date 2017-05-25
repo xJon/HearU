@@ -25,6 +25,7 @@
     <string name="mute">Mute</string>
     <string name="media">Media</string>
     <string name="minutes">minutes</string>
+    <string name="hours">hours</string>
     <string name="no">No</string>
     <string name="pick_time">Pick time</string>
     <string name="picker_hint">Press the buttons or fling the text to change time.</string>

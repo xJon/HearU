@@ -90,7 +90,9 @@
 			            android:layout_marginRight="10dip"
 						android:button="@drawable/btn_check_holo_light"
 			            android:text="@string/enable_vibration" 
-				        android:textSize="13sp"/>
+				        android:textSize="13sp"
+                        android:checked="true"
+						/>
 			        <CheckBox 
 			            android:id="@+id/disable_media_check"
 			            android:layout_height="wrap_content"

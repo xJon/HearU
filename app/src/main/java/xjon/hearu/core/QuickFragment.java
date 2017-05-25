@@ -61,6 +61,7 @@ public class QuickFragment extends Fragment implements OnClickListener {
 
 		vibrationCheck = (CheckBox) v.findViewById(R.id.enable_vibr_check);
 		vibrationCheck.setTypeface(typefaceRobotoLight);
+		vibrationCheck.setChecked(true);
 
 		if (Tools.isTablet(getActivity())) {
 			TextView title = (TextView) v.findViewById(android.R.id.title);
@@ -76,7 +77,26 @@ public class QuickFragment extends Fragment implements OnClickListener {
 
 			public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
                 if(progress != 0) {
-                    durationText.setText(progress + " " + getString(R.string.minutes));
+					String hourString = getString(R.string.hours);
+					if (progress >= 60 && progress < 120)
+					{
+						hourString = hourString.substring(0, 4);
+					}
+					if (progress % 60 == 0)
+					{
+						durationText.setText((progress / 60) + " " + hourString);
+					}
+					else if (progress < 60)
+					{
+						durationText.setText(progress + " " + getString(R.string.minutes));
+					}
+					else
+					{
+						int hours, minutes;
+						hours = progress / 60;
+						minutes = progress - (60 * hours);
+						durationText.setText(hours + " " + hourString + " and " + minutes + " " + getString(R.string.minutes));
+					}
                 }else{
                     durationText.setText(getActivity().getString(R.string.indefinitely));
                 }

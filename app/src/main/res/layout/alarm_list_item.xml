@@ -10,6 +10,7 @@
     android:paddingTop="6dip"
     android:paddingBottom="17dip"
     android:background="@drawable/list_item">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -79,11 +80,11 @@
                 android:textColor="#000000"/>
 
             <TextView
-                android:id="@+id/unmute_label"
+                android:id="@+id/disable_light_label"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:padding="5dip"
-                android:text="@string/unmute"
+                android:text="@string/disable_noti_light_short"
                 android:textSize="14sp"
                 android:textColor="#000000"/>
         </LinearLayout>
@@ -98,16 +99,18 @@
                 android:padding="5dip"
                 android:text="@string/lock"
                 android:textSize="14sp"
-                android:textColor="#000000"/>
+                android:textColor="#000000"
+                android:visibility="gone"/>
+
             <TextView
-                android:id="@+id/disable_light_label"
+                android:id="@+id/unmute_label"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:padding="5dip"
-                android:text="@string/disable_noti_light_short"
+                android:text="@string/unmute"
                 android:textSize="14sp"
-                android:textColor="#000000"/>
-
+                android:textColor="#000000"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
     <LinearLayout

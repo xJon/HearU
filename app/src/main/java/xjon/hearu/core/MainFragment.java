@@ -207,7 +207,6 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		Alarm[] alarmArray = new Alarm[alarm_data.size()];
 
 		alarmList.setAdapter(new AlarmAdapter(getActivity(), R.layout.alarm_list_item, alarm_data.toArray(alarmArray)));
-
 	}
 
 	@Override
@@ -375,6 +374,9 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		final CheckBox vibrationCheck = (CheckBox) view.findViewById(R.id.enable_vibr_check);
 		vibrationCheck.setChecked(enableVibration);
 		vibrationCheck.setTypeface(typefaceRobotoLight);
+		if (newAlarm) {
+			vibrationCheck.setChecked(true);
+		}
 
 		final CheckBox mediaCheck = (CheckBox) view.findViewById(R.id.disable_media_check);
 		mediaCheck.setChecked(muteMedia);
@@ -390,6 +392,7 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		final CheckBox unmuteCheck = (CheckBox) view.findViewById(R.id.call_unmute_check);
 		unmuteCheck.setChecked(unmuteOnCall);
 		unmuteCheck.setTypeface(typefaceRobotoLight);
+		unmuteCheck.setVisibility(View.GONE); //Temporarily disabled, not sure if I want this feature or not.
 
 		final CheckBox notiLightCheck = (CheckBox) view.findViewById(R.id.light_check);
 		notiLightCheck.setChecked(disableNotificationLight);
@@ -565,20 +568,10 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
         contactList = (TextView) view.findViewById(R.id.contacts);
 
-        String contacts = "\u200E";
-        ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
-        Contact[] contactsArray = new Contact[contactsArrayList.size()];
-        contactsArray = contactsArrayList.toArray(contactsArray);
-        for (Contact c : contactsArray)
-        {
-            if (c.getContactAlarmId() == alarmId)
-            {
-                contacts += c.getName() + "\u200E, ";
-            }
-        }
+        String contacts = getWhitelistedContacts(currentAlarmId);
         if (contacts != "\u200E")
         {
-            contactList.setText(contacts.substring(0, contacts.length() - 2) + "\u200E.");
+            contactList.setText(contacts);
         }
 
 		return dialog;
@@ -651,8 +644,23 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 		}
 	}
 
+	private String getWhitelistedContacts(int alarmId)
+	{
+		String contacts = "\u200E";
+		ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
+		Contact[] contactsArray = new Contact[contactsArrayList.size()];
+		contactsArray = contactsArrayList.toArray(contactsArray);
+		for (Contact c : contactsArray)
+		{
+			if (c.getContactAlarmId() == alarmId)
+			{
+				contacts += c.getName() + "\u200E, ";
+			}
+		}
+		return contacts != "\u200E" ? contacts.substring(0, contacts.length() - 2) + "\u200E." : contacts;
+	}
 
-    public void pickContact()
+    private void pickContact()
     {
 		Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
         pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); //Show only contacts with phone numbers
@@ -668,54 +676,35 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
             {
                 final Uri uri = data.getData();
                 final String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY };
-				
-                Thread thread = new Thread() {
-                    @Override
-                    public void run()
-                    {
-                        Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
-                        cursor.moveToFirst();
 
-                        int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY);
-                        String name = cursor.getString(nameColumnIndex);
+				Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
+				cursor.moveToFirst();
 
-                        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                        String number = cursor.getString(numberColumnIndex).replaceAll("[^0-9]", "");
-                        Contact c;
-                        if (number.length() != 10)
-                        {
-                            number = number.substring(3);
-                            String newNumber = "0" + number;
-                            c = new Contact(name, newNumber, currentAlarmId);
-                        }
-                        else
-                        {
-                            c = new Contact(name, number, currentAlarmId);
-                        }
-                        c = dbAdapter.createContact(c);
-                        contact_data.add(c);
-                    }
-                };
+				int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY);
+				String name = cursor.getString(nameColumnIndex);
 
-                thread.start();
-            }
-        }
+				int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+				String number = cursor.getString(numberColumnIndex).replaceAll("[^0-9]", "");
+				Contact c;
+				if (number.length() != 10)
+				{
+					number = number.substring(3);
+					String newNumber = "0" + number;
+					c = new Contact(name, newNumber, currentAlarmId);
+				}
+				else
+				{
+					c = new Contact(name, number, currentAlarmId);
+				}
+				c = dbAdapter.createContact(c);
+				contact_data.add(c);
 
-		String contacts = "\u200E";
-		ArrayList<Contact> contactsArrayList = dbAdapter.getAllContacts();
-		Contact[] contactsArray = new Contact[contactsArrayList.size()];
-		contactsArray = contactsArrayList.toArray(contactsArray);
-		for (Contact c : contactsArray)
-		{
-			if (c.getContactAlarmId() == currentAlarmId)
-			{
-				contacts += c.getName() + "\u200E, ";
+				String contacts = getWhitelistedContacts(currentAlarmId);
+				if (contacts != "\u200E")
+				{
+					contactList.setText(contacts);
+				}
 			}
-		}
-		if (contacts != "\u200E")
-		{
-			contactList.setText(contacts.substring(0, contacts.length() - 2) + "\u200E.");
-		}
-
+        }
     }
 }
