@@ -568,11 +568,14 @@ public class MainFragment extends Fragment implements OnClickListener, OnItemCli
 
         contactList = (TextView) view.findViewById(R.id.contacts);
 
-        String contacts = getWhitelistedContacts(currentAlarmId);
-        if (contacts != "\u200E")
+        if (!newAlarm)
         {
-            contactList.setText(contacts);
-        }
+			String contacts = getWhitelistedContacts(alarmId);
+			if (contacts != "\u200E")
+			{
+				contactList.setText(contacts);
+			}
+		}
 
 		return dialog;
 	}
